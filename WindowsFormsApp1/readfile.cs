@@ -2,96 +2,122 @@
 using System.Linq;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using System.Text.RegularExpressions;
 
 namespace log_parsing
 {
-    class ReadFile
+    class FileReader
     {
-        private string location;
-        public ReadFile(string path)
+        private int count = 0;
+        private int num_log = 0;
+        private string[] lines;
+        private string start = null, end = null;
+        private Dictionary<string, int> Levels = new Dictionary<string, int>()
         {
-            location = path;
+            {"DEBUG", 0 }, {"INFO", 0}, {"WARNING", 0}, { "ERROR", 0}
+        };
+        private Dictionary<string, int> Categories = new Dictionary<string, int>();
+        private Dictionary<string, int> Tag_dic = new Dictionary<string, int>();
+        
+        private void SetPath(string path)
+        {
+            lines = System.IO.File.ReadAllLines($"{path}");
+            num_log = lines.Length;
         }
-        public void rettime()
+        
+        public FileReader(string path)
         {
-            string[] lines = System.IO.File.ReadAllLines($"{location}");
-            int count = 0;
-            int num_log = lines.Length;
+            SetPath(path);
             foreach (string line in lines)
             {
-                string[] parser = line.Split(",");
-                if (count == 0)
+                string[] parser = line.Split(',');
+                if(count == 0)
                 {
-                    Console.WriteLine($"Starts at: {parser[2]}");
+                    start = parser[2];
                 }
-                if (count == (num_log - 1))
+                else if (count == (num_log - 1))
                 {
-                    Console.WriteLine($"Ends at: {parser[2]}");
+                    end = parser[2];
                 }
+                UpdateLevel(parser);
+                UpdateCategory(parser);
+                UpdateTag(parser);
                 count += 1;
             }
         }
-        public void retlevel()
+        
+        public Tuple<string, string> PassTime()
         {
-            Dictionary<string, int> levels = new Dictionary<string, int>()
+            var tuple = new Tuple<string, string>(start, end);
+            return tuple;
+        }
+        
+        public Dictionary<string, int> PassLevel()
+        {
+            return Levels;
+        }
+        
+        public Dictionary<string, int> PassCategory()
+        {
+            return Categories;
+        }
+        
+        public Dictionary<string, int> PassTag()
+        {
+            return Tag_dic;
+        }
+        
+        private void UpdateLevel(string[] parser)
+        {
+            if (Levels.ContainsKey(parser[0]))
             {
-                {"DEBUG", 0 }, {"INFO", 0}, {"WARNING", 0}, { "ERROR", 0}
-            };
-            string[] lines = System.IO.File.ReadAllLines($"{location}");
-            foreach (string line in lines)
+                int cur_value = Convert.ToInt32(Levels[parser[0]]);
+                Levels[parser[0]] = cur_value + 1;
+            }
+        }
+        
+        private void UpdateCategory(string[] parser)
+        {
+            bool exist = false;
+            if (Categories.ContainsKey(parser[1]))
             {
-                string[] parser = line.Split(",");
-                foreach (var key in levels.Keys.ToList())
+                int cur_value = Convert.ToInt32(Categories[parser[1]]);
+                Categories[parser[1]] = cur_value + 1;
+                exist = true;
+            }
+            if (!exist)
+            {
+                Categories.Add(parser[1], 1);
+            }
+        }
+        
+        private void UpdateTag(string[] parser)
+        {
+            string temp = parser[3];
+            int pos_start = temp.IndexOf('@');
+            int pos_end = temp.IndexOf('#');
+            string extract = null;
+            string[] tags = null;
+            if (pos_start >= 0 && pos_end >=0)
+            {
+                extract = temp.Remove(pos_end);
+                extract = extract.Remove(0, 1);
+                tags = extract.Split(';');
+                foreach (string tag in tags)
                 {
-                    if (key == parser[0])
+                    if (Tag_dic.ContainsKey(tag))
                     {
-                        int cur_value = Convert.ToInt32(levels[key]);
-                        levels[key] = cur_value + 1;
+                        int cur_value = Convert.ToInt32(Tag_dic[tag]);
+                        Tag_dic[tag] = cur_value + 1;
+                    }
+                    else
+                    {
+                        Tag_dic.Add(tag, 1);
                     }
                 }
             }
-            Console.WriteLine($"DEBUG: {levels["DEBUG"]}, INFO: {levels["INFO"]}, WARNING: {levels["WARNING"]}, ERROR: {levels["ERROR"]}");
-        }
-        public void retcategory()
-        {
-            Dictionary<string, int> levels = new Dictionary<string, int>();
-            string[] lines = System.IO.File.ReadAllLines($"{location}");
-            foreach (string line in lines)
-            {
-                bool exist = false;
-                string[] parser = line.Split(",");
-                foreach (var key in levels.Keys.ToList())
-                {
-                    if (key == parser[1])
-                    {
-                        int cur_value = Convert.ToInt32(levels[key]);
-                        levels[key] = cur_value + 1;
-                        exist = true;
-                        continue;
-                    }
-                }
-                if (exist == false)
-                {
-                    levels.Add(parser[1], 0);
-                }
-            }
-            foreach (KeyValuePair<string, int> kvp in levels)
-            {
-                Console.Write(kvp.Key + ": " + kvp.Value + "\t");
-            }
-        }
-    }
-    class process
-    {
-        static void Main()
-        {
-            string location;
-            Console.Write("Input file path: ");
-            location = Console.ReadLine();
-            ReadFile reader = new ReadFile(location);
-            reader.retlevel();
-            reader.retcategory();
-            reader.rettime();
         }
     }
 }

@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Runtime.Remoting.Contexts;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -26,28 +27,38 @@ namespace WindowsFormsApp1
         private void enter_Click(object sender, EventArgs e)
         {
             string filepath = inputpath.Text;
-            ReadFile reader = new ReadFile(filepath);
-            var time = reader.rettime();
-            var levels = reader.retlevel();
-            var categories = reader.retcategory();
-            var tags = reader.rettag();
+            FileReader reader = new FileReader(filepath);
+            var time = reader.PassTime();
+            var levels = reader.PassLevel();
+            var categories = reader.PassCategory();
+            var tags = reader.PassTag();
             display.Text = "Starts at: " + time.Item1 + Environment.NewLine;
-            display.AppendText("Ends at: " + time.Item2 + Environment.NewLine);
-            display.AppendText("Levels: " + Environment.NewLine);
+            display.AppendText("Ends at: " + time.Item2 + Environment.NewLine + Environment.NewLine);
+            display.AppendText("Levels total: " + levels.Count + Environment.NewLine + Environment.NewLine);
             foreach(KeyValuePair<string, int> kvp in levels)
             {
-                display.Text += string.Format("{0}: {1}\t", kvp.Key, kvp.Value);
+                display.Text += string.Format("{0}: {1}\t", kvp.Key, kvp.Value) + Environment.NewLine;
             }
-            display.AppendText(Environment.NewLine + "Categories: " + Environment.NewLine);
+            display.AppendText(Environment.NewLine + "Categories total: " + categories.Count + Environment.NewLine + Environment.NewLine);
             foreach (KeyValuePair<string, int> kvp in categories)
             {
-                display.Text += string.Format("{0}: {1}\t", kvp.Key, kvp.Value);
+                display.Text += string.Format("{0}: {1}\t", kvp.Key, kvp.Value) + Environment.NewLine;
             }
-            display.AppendText(Environment.NewLine + "Tags: " + Environment.NewLine);
+            display.AppendText(Environment.NewLine + "Tags total: " + tags.Count + Environment.NewLine + Environment.NewLine);
             foreach (KeyValuePair<string, int> kvp in tags)
             {
-                display.Text += string.Format("{0}: {1}\t", kvp.Key, kvp.Value);
+                display.Text += string.Format("{0}: {1}\t", kvp.Key, kvp.Value) + Environment.NewLine;
             }
+        }
+
+        private void display_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void inputpath_TextChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }

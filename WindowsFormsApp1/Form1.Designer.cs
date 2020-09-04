@@ -50,10 +50,11 @@
             this.inputpath.Name = "inputpath";
             this.inputpath.Size = new System.Drawing.Size(477, 22);
             this.inputpath.TabIndex = 1;
+            this.inputpath.TextChanged += new System.EventHandler(this.inputpath_TextChanged);
             // 
             // enter
             // 
-            this.enter.Location = new System.Drawing.Point(648, 68);
+            this.enter.Location = new System.Drawing.Point(648, 67);
             this.enter.Name = "enter";
             this.enter.Size = new System.Drawing.Size(75, 23);
             this.enter.TabIndex = 2;
@@ -67,8 +68,10 @@
             this.display.Multiline = true;
             this.display.Name = "display";
             this.display.ReadOnly = true;
+            this.display.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.display.Size = new System.Drawing.Size(750, 275);
             this.display.TabIndex = 3;
+            this.display.TextChanged += new System.EventHandler(this.display_TextChanged);
             // 
             // Form1
             // 
