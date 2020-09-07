@@ -8,12 +8,14 @@ using System.Runtime.Remoting.Contexts;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.IO;
 using log_parsing;
 
 namespace WindowsFormsApp1
 {
     public partial class Form1 : Form
     {
+        private string filename;
         public Form1()
         {
             InitializeComponent();
@@ -27,7 +29,25 @@ namespace WindowsFormsApp1
         private void enter_Click(object sender, EventArgs e)
         {
             string filepath = inputpath.Text;
-            FileReader reader = new FileReader(filepath);
+            string[] lines = null;
+            try
+            {
+                lines = System.IO.File.ReadAllLines($"{filepath}");
+            }
+            catch(FileNotFoundException)
+            {
+                DialogResult d;
+                d = MessageBox.Show("File not found.", "Retry input", MessageBoxButtons.YesNo, MessageBoxIcon.Information);
+                if (d == DialogResult.No)
+                {
+                    System.Environment.Exit(0);
+                }
+                else
+                {
+                    goto Label;
+                }
+            }
+            FileReader reader = new FileReader(lines);
             var time = reader.PassTime();
             var levels = reader.PassLevel();
             var categories = reader.PassCategory();
@@ -49,6 +69,7 @@ namespace WindowsFormsApp1
             {
                 display.Text += string.Format("{0}: {1}\t", kvp.Key, kvp.Value) + Environment.NewLine;
             }
+            Label:;
         }
 
         private void display_TextChanged(object sender, EventArgs e)
@@ -58,7 +79,23 @@ namespace WindowsFormsApp1
 
         private void inputpath_TextChanged(object sender, EventArgs e)
         {
+            
+        }
 
+        private void openFileDialog1_FileOk(object sender, CancelEventArgs e)
+        {
+
+        }
+
+        private void browse_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog dlg = new OpenFileDialog();
+            if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK && dlg.FileName != null)
+            {
+                // Open document
+                filename = dlg.FileName;
+            }
+            inputpath.Text = filename;
         }
     }
 }

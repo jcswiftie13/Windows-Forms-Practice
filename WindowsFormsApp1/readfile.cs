@@ -5,6 +5,7 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Text.RegularExpressions;
+using System.IO;
 
 namespace log_parsing
 {
@@ -12,7 +13,6 @@ namespace log_parsing
     {
         private int count = 0;
         private int num_log = 0;
-        private string[] lines;
         private string start = null, end = null;
         private Dictionary<string, int> Levels = new Dictionary<string, int>()
         {
@@ -21,15 +21,9 @@ namespace log_parsing
         private Dictionary<string, int> Categories = new Dictionary<string, int>();
         private Dictionary<string, int> Tag_dic = new Dictionary<string, int>();
         
-        private void SetPath(string path)
+        public FileReader(string[] lines)
         {
-            lines = System.IO.File.ReadAllLines($"{path}");
             num_log = lines.Length;
-        }
-        
-        public FileReader(string path)
-        {
-            SetPath(path);
             foreach (string line in lines)
             {
                 string[] parser = line.Split(',');
